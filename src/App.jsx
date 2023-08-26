@@ -5,16 +5,16 @@ import Confetti from "react-confetti"
 
 // To do
 // 1. Put real dots on the dice
-// 2. Track the number of rolls
-// 3. Track the time it took to win
 // 4. Save your best time to localStorage
 
 export default function App() {
 
     const [dice, setDice] = React.useState(allNewDice())
     const [rollCounter, setRollCounter] = React.useState(0)
+    const [gameTime, setGameTime] = React.useState([new Date(), 0])
     const [tenzies, setTenzies] = React.useState(false)
     
+    // Figuring out when game is finished
     React.useEffect(() => {
         const allHeld = dice.every(die => die.isHeld)
         const firstValue = dice[0].value
@@ -23,6 +23,20 @@ export default function App() {
             setTenzies(true)
         }
     }, [dice])
+
+    // Updating gameTime until game finished
+    React.useEffect(() => {
+        if(!tenzies) {
+            const timer = setTimeout(() => {
+                setGameTime(prev => {
+                    const updateGameTime = [...prev]
+                    updateGameTime[1] = Math.floor((new Date() - prev[0]) / 1000)
+                    return updateGameTime
+                })
+            }, "1000")
+            return () => clearTimeout(timer)
+        }
+    })
 
     function generateNewDie() {
         return {
@@ -52,6 +66,7 @@ export default function App() {
             setTenzies(false)
             setDice(allNewDice())
             setRollCounter(0)
+            setGameTime([new Date(), 0])
         }
     }
     
@@ -84,6 +99,9 @@ export default function App() {
             <div className="score">
                 <span className="score_item">
                     Rolls: {rollCounter}
+                </span>
+                <span className="score_item">
+                    Game time: {gameTime[1]} s
                 </span>
             </div>
             <button 
