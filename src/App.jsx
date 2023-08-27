@@ -5,13 +5,15 @@ import Confetti from "react-confetti"
 
 // To do
 // 1. Put real dots on the dice
-// 4. Save your best time to localStorage
 
 export default function App() {
 
     const [dice, setDice] = React.useState(allNewDice())
     const [rollCounter, setRollCounter] = React.useState(0)
     const [gameTime, setGameTime] = React.useState([new Date(), 0])
+    const [bestTime, setBestTime] = React.useState(
+        () => JSON.parse(localStorage.getItem("bestTime")) || false
+    )
     const [tenzies, setTenzies] = React.useState(false)
     
     // Figuring out when game is finished
@@ -21,6 +23,12 @@ export default function App() {
         const allSameValue = dice.every(die => die.value === firstValue)
         if (allHeld && allSameValue) {
             setTenzies(true)
+
+            // Update best time in localStorage
+            if(!bestTime || bestTime > gameTime[1]) {
+                localStorage.setItem("bestTime", JSON.stringify(gameTime[1]))
+                setBestTime(() => JSON.parse(localStorage.getItem("bestTime")))
+            } 
         }
     }, [dice])
 
@@ -103,6 +111,9 @@ export default function App() {
                 <span className="score_item">
                     Game time: {gameTime[1]} s
                 </span>
+                {<span className="score_item">
+                    Best time: {bestTime ? `${bestTime} s` : "--"}
+                </span>}
             </div>
             <button 
                 className="roll-dice" 
